@@ -1,0 +1,35 @@
+Linux
+Networking
+Terraform
+AWS
+Ansible
+Jenkins/Harness
+ELK/EFK
+Docker/Kubernetes
+Controller, DNS, networking management
+Shell Scripting
+OpenShift
+New Relic/Appdynamics/Zabbix 
+Prometheus and Grafana
+
+Linux AWS Ansible Terraform Jenkins Prometheus Grafana Docker Kubernetes ELK/EFK ,Server Hardening, hackthebox.eu
+
+firewall is disabled in Linux by default
+127.0.0.1 vs 0.0.0.0? 
+must: tmux
+Docker is last prioroty since not everyone uses it
+linux aws ansible terraform jenkins prometheus grafana
+over the wire - linux - CTF
+distrowatch - free servers
+apache tomcat
+nginx handbook freecodecamp
+SSL
+IaaC (one file turns into a machine)
+network: ping traceroute dns dig host
+strace ltrace 
+cut awk grep egrep nl tr sed 
+ps top htop 
+firewall iptables,ufw (high-level interface for iptables)
+netstat nmap
+status codes
+windows environment- powershell, active directory

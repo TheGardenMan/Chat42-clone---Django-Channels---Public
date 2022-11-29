@@ -1,0 +1,19 @@
+#works DO NOT TOUCH
+[Unit]
+Description=Daphne C42
+After=network.target
+[Service]
+Environment="secret_key=d(0_a+($7*dbbgchr-s(@+#!9q408ja20b+b70(uote0fliff9"
+Environment="admin_username=jagadees"
+Environment="admin_user_id=1"
+Environment="DJANGO_SETTINGS_MODULE=mysite.dev_settings"
+Environment="postgres_username=postgres"
+Environment="postgres_password=jaxtek"
+Environment="postgres_port=5432"
+Type=simple
+User=jaga
+WorkingDirectory=/home/jaga/C42
+ExecStart=daphne -p 8000 mysite.asgi:application
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

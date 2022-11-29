@@ -1,0 +1,45 @@
+#Important : "aioredis" will not throw any exception if not installed. But channels won't work / work as expected, if its not installed.. 
+#If something fails or doesn't work while running c42, install packages one by one from "D:\Projects\C42\req_before_cleanup_DND.txt".Get this file from old commits
+aioredis==1.3.1
+asgiref==3.3.4
+async-timeout==3.0.1
+attrs==21.2.0
+autobahn==21.3.1
+Automat==20.2.0
+certifi==2020.12.5
+cffi==1.14.5
+channels==3.0.3
+channels-redis==3.2.0
+chardet==4.0.0
+constantly==15.1.0
+cryptography==3.4.7
+#custom package
+git+https://github.com/TheGardenMan/daphne.git#egg=daphne
+Django==3.2.3
+django-cors-headers==3.7.0
+django-redis==4.12.1
+djangorestframework==3.12.4
+hiredis==2.0.0
+hyperlink==21.0.0
+idna==2.10
+incremental==21.3.0
+msgpack==1.0.2
+oauthlib==3.1.0
+psycopg2==2.8.6
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pycparser==2.20
+pyOpenSSL==20.0.1
+pytz==2021.1
+redis==3.5.3
+requests==2.25.1
+requests-oauthlib==1.3.0
+service-identity==21.1.0
+six==1.16.0
+sqlparse==0.4.1
+Twisted==21.2.0
+twisted-iocpsupport==1.0.1
+txaio==21.2.1
+typing-extensions==3.10.0.0
+urllib3==1.26.4
+zope.interface==5.4.0

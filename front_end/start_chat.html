@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Set your preferences and start chatting!</title>
+		<style>
+			.skyblue_button
+			{
+				background-color: #00bff3;
+				border: none;
+				color: white;
+				padding: 10px;
+				text-align: center;
+				text-decoration: none;
+				font-size: 16px;
+				margin: 4px 2px 2px 2px;
+				width: 60%;
+				position:relative;
+				left:20%;
+			}
+			.skyblue_button:hover{
+				background-color:hotpink;
+
+			}
+			input,select
+			{
+				width: 100%;
+				padding: 15px;
+				margin: 5px 0 22px 0;
+				border: none;
+				background: #f1f1f1;
+			}
+			.page_to_center
+			{
+				font-family: 'Helvetica Neue', sans-serif;
+				margin: auto;
+				width: 50%;
+				padding: 10px;
+			}
+			@media screen and (max-width: 768px) 
+			{
+		 		input,select
+				{
+			 		width: 80%;
+				}
+				.skyblue_button
+				{
+					width: 80%;
+					left: 10%;
+				}
+				.page_to_center
+				{
+					width: 100%;
+				}
+		  	}
+
+		</style>
+				<!-- script beigs -->
+				<script type="text/javascript">
+					function getCookie(name) 
+					{
+						let cookie = {};
+						document.cookie.split(';').forEach(function(el) {
+							let [k,v] = el.split('=');
+							cookie[k.trim()] = v;
+						})
+						return cookie[name];
+					}
+					var token = getCookie("token");
+					var server_url = window.location.origin + "/";
+			
+					var requestOptions = {
+							mode:'cors',
+							method: 'POST',
+							redirect: 'follow',
+							headers: {
+								'Authorization': 'Token '+token ,
+								'Content-Type': 'application/json'
+							},
+						};
+					
+					async function setPreferences()
+					{
+						requestOptions.body = (
+							JSON.stringify({
+								bio:document.getElementById("bio").value,
+								gender_preference:document.getElementById("gender_preference").value
+							})
+							);
+						document.getElementById("info_message").innerHTML = "";
+						try 
+						{
+							const response=await fetch(server_url + "set_preferences/", requestOptions).then( response => {return response;})
+								if (response.status=="200")
+								{
+									window.location.href = server_url + "chat/";
+								}
+								else
+								{
+									console.log("submit pref failed",response);
+									document.getElementById("info_message").innerHTML = "Error occurred";
+								}				
+						}
+						catch (error) {
+							console.log(error);
+							document.getElementById("info_message").innerHTML = "Error occurred";
+						}
+			
+					}
+					
+					async function loadPreferences()
+					{
+						console.log("loadPrefs");
+						try
+						{
+							const responseData=await fetch(server_url + "get_preferences/", requestOptions).then( response => response.json().then(receivedData => ({status:response.status,data:receivedData})));
+							if (responseData.status!="200")
+							{
+								document.getElementById("info_message").innerHTML = responseData.data.detail || "error occurred";
+								return;
+							}
+							let parsedData = responseData.data;
+							console.log(parsedData);
+							//
+							document.getElementById("username").innerHTML = parsedData.username;
+							if(parsedData.gender=="m")
+							{
+								document.getElementById("gender").innerHTML = "Male";
+							}
+							else
+							{
+								document.getElementById("gender").innerHTML = "Female";
+							}
+							document.getElementById("age").innerHTML = parsedData.age;
+							//
+							document.getElementById("bio").value = parsedData.bio;
+							document.getElementById("gender_preference").value = parsedData.gender_preference;
+							//enable the button
+							document.getElementById("body_div").style.display = "block"; 
+							document.getElementById("start_chat_button").disabled = false; 
+							//set focus on bio
+							document.getElementById("bio").focus();
+
+						} 
+						catch (error)
+						{
+							console.log(error,"loadPrfes");
+							document.getElementById("info_message").innerHTML = "Error occurred";
+						}
+					}
+					
+			/* do not async the below function*/
+					function onSubmitPreferences() 
+					{
+						setPreferences();
+						return false;
+					}
+					//DND
+					window.onload = function() {
+						loadPreferences();
+					};
+					</script>
+					<!-- script done -->
+	</head>
+
+	<body>
+	<p id="info_message" style="color: red;text-align: center;"></p>
+	<div id="body_div" style="display: none;">
+		<h1 style="text-align: page_to_center;color: hotpink;">Start chatting!</h1>
+		<p>Your profile</p>
+		<div style="overflow: hidden;" >
+			<b>Username:</b> <p id="username" style="display: inline;">Loading</p><br>
+			<b>Age:</b> <p id="age" style="display: inline;">Loading..</p><br>
+			<b>Gender:</b> <p id="gender" style="display: inline;">Loading..</p>
+		</div>
+		<br>
+		<form onsubmit="return onSubmitPreferences()">
+			<p>Your bio</p>
+			<input type="text" id="bio" minlength="2" maxlength="140" value="Hello there!" required>
+			<br>
+			<p>Gender preference</p>
+			<select id="gender_preference" required>
+				<option value="a">All</option>
+				<option value="m">Male</option>
+				<option value="f">Female</option>
+			</select>
+			<br>
+			<input class="skyblue_button" type="submit" value="Start chatting!" id="start_chat_button" disabled>
+		</form>
+	</div>
+	</body>
+</html>

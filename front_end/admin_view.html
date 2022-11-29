@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Admin view</title>
+		<style>
+			.skyblue_button
+			{
+				background-color: #00bff3;
+				border: none;
+				color: white;
+				padding: 10px;
+				text-align: center;
+				text-decoration: none;
+				font-size: 16px;
+				margin: 4px 2px 2px 2px;
+				width: 60%;
+				position:relative;
+				left:20%;
+			}
+			.skyblue_button:hover{
+				background-color:hotpink;
+
+			}
+			input,select
+			{
+				width: 100%;
+				padding: 15px;
+				margin: 5px 0 22px 0;
+				border: none;
+				background: #f1f1f1;
+			}
+			.page_to_center
+			{
+				font-family: 'Helvetica Neue', sans-serif;
+				margin: auto;
+				width: 50%;
+				padding: 10px;
+			}
+			@media screen and (max-width: 768px) 
+			{
+		 		input,select
+				{
+			 		width: 80%;
+				}
+				.skyblue_button
+				{
+					width: 80%;
+					left: 10%;
+				}
+				.page_to_center
+				{
+					width: 100%;
+				}
+		  	}
+
+		</style>
+				<!-- script beigs -->
+				<script type="text/javascript">
+					function getCookie(name) 
+					{
+						let cookie = {};
+						document.cookie.split(';').forEach(function(el) {
+							let [k,v] = el.split('=');
+							cookie[k.trim()] = v;
+						})
+						return cookie[name];
+					}
+					var token = getCookie("token");
+					var server_url = window.location.origin + "//";
+			
+					var requestOptions = {
+							mode:'cors',
+							method: 'POST',
+							redirect: 'follow',
+							headers: {
+								'Authorization': 'Token '+token ,
+								'Content-Type': 'application/json'
+							},
+						};
+					
+					async function getNewMatchesSync()
+					{
+						requestOptions.body = (
+							JSON.stringify({
+								seconds:document.getElementById("seconds").value
+							})
+							);
+						try 
+						{
+							const response=await fetch(server_url + "new_matches/", requestOptions).then( response => response.json().then(receivedData => ({status:response.status,data:receivedData})))
+							console.log(response);
+
+							if (response.status=="200")
+							{
+								document.getElementById("new_matches").innerHTML = response.data.count;
+							}
+							else
+							{
+								console.log(response);
+								document.getElementById("new_matches").innerHTML = "Error!!!";
+							}				
+						}
+						catch (error) {
+
+							console.log(error);
+							document.getElementById("new_matches").innerHTML = "Error occurred";
+						}
+			
+					}
+					
+					async function getOnlineUsersCountSync()
+					{
+			
+						try 
+						{
+							const response=await fetch(server_url + "online_users/", requestOptions).then( response => response.json().then(receivedData => ({status:response.status,data:receivedData})))
+							if (response.status=="200")
+							{
+								document.getElementById("online_users").innerHTML = response.data.count;
+							}
+							else
+							{
+								console.log(response);
+								document.getElementById("online_users").innerHTML = "Error!!!";
+							}				
+						}
+						catch (error) {
+							console.log(error);
+							document.getElementById("online_users").innerHTML = "Error occurred";
+						}
+			
+					}
+					
+			/* do not async the below function*/
+					function getNewMatches() 
+					{
+						getNewMatchesSync();
+						return false;
+					}
+
+					function getOnlineUsersCount() 
+					{
+						getOnlineUsersCountSync();
+						return false;
+					}
+
+					function loadAll()
+					{
+						getNewMatches();
+						getOnlineUsersCount();
+					}
+					//DND
+					window.onload = function() {
+						loadAll();
+					};
+					</script>
+					<!-- script done -->
+	</head>
+
+	<body>
+	<p id="info_message" style="color: red;text-align: center;"></p>
+	<div id="body_div" class="page_to_center">
+		<h1 style="text-align: page_to_center;color: hotpink;">Admin UI</h1>
+
+		================================================================
+		Seconds
+		<input type="number" id="seconds" value="10000">
+		New Matches: <span id="new_matches">No matches yet</span><br>
+		<button type="button" onclick="getNewMatches()">Get new matches</button>
+		<br><br><br>
+		================================================================
+
+		Online users: <span id="online_users">No count yet</span><br>
+		<button type="button" onclick="getOnlineUsersCount()">Get online users</button>
+
+		================================================================
+	</div>
+	</body>
+</html>

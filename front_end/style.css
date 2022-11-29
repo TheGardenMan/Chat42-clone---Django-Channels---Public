@@ -1,0 +1,167 @@
+html,body {
+    min-height: 100%;
+    overflow: hidden;
+}
+#chat_window{
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+.card-height{
+    height: calc(100vh - 240px);
+}
+.card-width{
+    width: calc(100vw - 15px);
+}
+.page_to_center{
+    font-family: 'Helvetica Neue', sans-serif;
+}
+.chat-list {
+    padding-top: 10px;
+}
+
+.chat-list li {
+    color: #ffffff;
+}
+
+.chat-list .chat-message {
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+    border-radius: 50px;
+    background: #00bff3;
+    display: inline-block;
+    padding: 10px 15px 0px;
+    position: relative;
+}
+
+.chat-list .chat-message:before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    width: 0;
+    height: 0;
+}
+
+.chat-list .chat-body {
+    margin-left: 20px;
+    float: left;
+    width: 70%;
+}
+
+.chat-list .out .chat-body {
+    margin-left: 20px;
+    float: left;
+    width: 70%;
+}
+
+.chat-list .out .chat-message {
+    background: hotpink;
+}
+
+.skyblue_button {
+	background-color: #00bff3;
+	border: none;
+	color: white;
+	padding: 10px;
+	text-align: center;
+	text-decoration: none;
+	font-size: 16px;
+	margin: 4px 2px 2px 2px;
+	width: 60%;
+	position: relative;
+	left: 20%;
+}
+
+.skyblue_button:hover {
+	background-color: hotpink;
+}
+
+.page_to_center {
+	font-family: 'Helvetica Neue', sans-serif;
+	margin: auto;
+	width: 50%;
+	padding: 10px;
+}
+.login-page{
+	width: 100%;
+    max-width: 330px;
+    margin: auto;
+}
+
+@media screen and (max-width: 768px) {
+
+	.skyblue_button {
+		width: 80%;
+		left: 10%;
+	}
+
+	.page_to_center {
+		width: 100%;
+	}
+}
+
+
+
+
+
+
+
+/* Comments */
+
+
+			/* html,body {
+				min-height: 100%;
+			}
+			.card-height{
+				height: calc(100vh - 240px);
+			}
+			.card-width{
+				width: calc(100vw - 15px);
+			} */
+			/* .skyblue_button
+			{
+				background-color: #00bff3;
+				border: none;
+				color: white;
+				padding: 10px;
+				text-align: center;
+				text-decoration: none;
+				font-size: 16px;
+				margin: 4px 2px 2px 2px;
+				width: 60%;
+				position:relative;
+				left:20%;
+			}
+			.skyblue_button:hover{
+				background-color:hotpink;
+
+			} */
+			/* input,select
+				width: 70%;
+				padding: 15px;
+				margin: 5px 0 22px 0;
+				border: none;
+				background: #f1f1f1;
+			} */
+			/* .page_to_center
+			{
+				font-family: 'Helvetica Neue', sans-serif;
+				margin: auto;
+				width: 50%;
+				padding: 10px;
+			} */
+			/* @media screen and (max-width: 768px) 
+			{
+		 		input,select
+				{
+			 		width: 65%;
+				}
+				.skyblue_button
+				{
+					width: 80%;
+					left: 10%;
+				}
+				.page_to_center
+				{
+					width: 100%;
+				}
+		  	} */

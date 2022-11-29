@@ -1,0 +1,177 @@
+#front_end flow WS↓
+if exception_handler catches the exception it will return 500
+start_chat ==>connect, READY==>chat_page (WAIT_FOR_OPPONENT and chat)
+	---inside chat_page starts↓--
+when OPPONENT_LEFT middle_menu,you can READY or go back to start_chat
+EXIT when you want to go to different user
+	---inside chat_page ends--
+disconnect when leaving chat_page (i.e not clicking "conitinue chattting" )
+
+# front_end notes
+report calls the EXIT.So no need to do it urself
+report format {"CMD":"REPORT","report_id":"1","report_text":"he's dump"}
+report_text is optional unless report_id is 3
+report_text in 200 chars limit
+feedback text is 500 chars limit
+validate all data in client itself
+after report, client should manually call the READY (like EXIT).
+
+#	HTTP APIs↓
+All requests are POST
+VCS:All data sent is validated in both client & server
+Auth:Authentication required.400 will be returned if not authed
+
+#signup api now does signup and create_profile
+signup/
+	ip:username,password,gender (m or f),birth_month,birth_year
+		#VCS
+		#in client,validate username only when signup is clicked (to reduce load)
+		username:(unique-5to15chars-django_allowed_chars-smallCase)
+		password:(8to15chars-alphanumeric(english & numbers only)-allCases)
+		add to redis incomplete_registration
+	op:201,{username,token}
+		OR
+		500,{error:"Error message"}
+
+#username_check
+username_check
+	username_check
+	if available:200 else 204
+
+
+#setting gender,birth_year,month.Called only once
+unused:create_profile/
+	user_id,username,date_of_birth,gender,age
+	#VCS,Auth
+	ip:gender(M,F),birth year(1931 to 2008-since age limit is 13 to 90),birth_month(1 to 12)
+	op :
+		save details
+		save default preferences to db ((this loads default values for Bio & gender_preference))
+		200
+	#if profile is not complete,after login they will be taken to create_profile page.Else they will go start_chat page.start_chat page will show default preferences.then they can be changed
+
+get_profile is not needed.we use get_preferences to get all
+#setting preferences
+set_preferences/
+	#default preferences are already loaded once a/c is created
+	#VCS,Auth
+	ip:{bio:140 chars,gender:m,f,a--male,female,all(default)}
+	op:200
+		or
+		500,{error:"Error message"}
+#get preferences.we return requesting user's profile details too.we show them in start_chat menu
+
+GET request
+get_preferences/
+	#Auth
+	op:200,{username,age,gender,bio:140 chars,gender:m,f,a}
+		or
+		500,{error:"Error message"}
+
+#login
+login/
+	ip:username,password
+	op:200,{username,token}
+		or
+		400
+
+logout/
+	#Auth
+	op:200 or 500
+
+#signup flow
+		username_check
+		signup
+		create_profile
+		get_preferences
+		set_preferences
+#login flow
+		login
+		get_preferences
+		set_preferences
+#WS APIs ↓
+	Now available:
+	CONNECT
+	WAIT_FOR_OPPONENT
+	OPPONENT_DETAILS (name, gender, age, bio)
+	MSG
+	EXIT
+	OPPONENT_LEFT
+	READY
+	FEEDBACK
+	REPORT
+	ERROR
+	DISCONNECT
+
+========Design==================
+signup:
+	-
+	done:username(unique-5to15chars-django_allowed_chars-smallCase)
+	done:password(8to15chars-alphanumeric(english & numbers only)-allCases)
+	-
+	year and month of birth-range 13 to 90(calc age using this)*
+	gender(m,f)*
+	-
+	Bio(140 chars)
+	Gender pref(m,f,anyone)
+
+Chat:
+	username,age,bio on top
+	-
+	Exit the chat -back to main menu
+	Go to next person-get grouped with a new person
+	Report & back to main menu
+		0.spam/bot/fake account
+		1.inappropriate username/profile/bio
+		2.abuse/sex talk/nudity
+		3.others(text-box is compulsory,200 chars)
+	Feedback:500 chars limit
+	-
+	=================Flow=======================
+	#Screens#
+		login
+		signup
+		create_profile
+		start_chat(shown:name*,age*,gender*,age pref,gender pref,bio,start_chat button)
+		middle_menu(continue_chat,exit_to_main_menu,feedback buttons)
+		feedback is given on same page.click.a box appears.type,submit show "submitted" on same page,start_chat.Unlimited feedbacks.
+	click "start chatting" 
+		push to redis
+	client is waiting 
+		if user is blocked,push them to blocked SET in Redis
+		else ==>return WAIT_FOR_OPPONENT-client shows "finding a match"
+		if opponent found:
+				put A & B in same group
+				send A to B & vice versa
+				return OPPONENT_DETAILS,name,gender,age,bio-client shows "chat started"
+		else:
+				NO_OPPONENT - client shows "match not found"
+				use this message for blocked users too
+	A sends a message like "MESSAGE,actual message".It is received by B..
+	...msgs msgs msgs....
+
+	2.Sending commands via WebSockets.Send them via JSON.Example
+	var message=["EXIT"]
+	var message=["MESSAGE","Hi I am jaga"]
+
+	cases:
+		1.userA goes from userB to next userC
+			:A sends READY-receives WAIT_FOR_OPPONENT
+				server removes A & B from group
+			:B receives OPPONENT_LEFT-"User has left the chat+middle_menu"
+		2.userA exits the chat
+			:A (clicks) sends EXIT (and Returns to middle_menu)
+			:B receives OPPONENT_LEFT-"User has left the chat+middle_menu"
+		3.user disconnects without informing
+			:no command is received.Disconnect() gets called
+			:B receives OPPONENT_LOST-"User's connection has been lost.Do you wanna go to next chat? middle_menu".
+		4.userA reports userB
+			:same as EXIT
+			:A sends REPORT_OPPONENT & return to middle_menu
+			:Chat gets closed.ID of B is added to monitoring table(PKEY 				auto_inc,reporter,reportee,timestamp).If count of reports is >n,user 	is blacklisted
+			:B receives OPPONENT_LEFT.middle_menu.When B connects again (using READY)
+				if B is blacklisted
+					NO_OPPONENT is returned
+					or
+					WAIT_FOR_OPPONENT is returned
+		5.middle_menu feedback button:FEEDBACK (500 chars limit)

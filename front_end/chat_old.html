@@ -1,0 +1,391 @@
+<!-- LW:see cv.html -->
+<!DOCTYPE html>
+<html>
+	<head>
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Chat!</title>
+		<style>
+
+		</style>
+				<!-- script begins -->
+				<script type="text/javascript">
+
+					function setCookie(name,value,days)
+					{
+			    		var expires = "";
+			    		if (days)
+						{
+			        		var date = new Date();
+			        		date.setTime(date.getTime() + (days*24*60*60*1000));
+			        		expires = "; expires=" + date.toUTCString();
+			    		}
+			    		document.cookie = name + "=" + (value || "")  + expires + "; path=/;samesite=strict;secure;";
+					}
+					//setCookie("token","e61f0e91e73cbf09a5c90b0322f10a5d25aade00",10);
+					
+
+					function getCookie(name) 
+					{
+						let cookie = {};
+						document.cookie.split(';').forEach(function(el) {
+							let [k,v] = el.split('=');
+							cookie[k.trim()] = v;
+						})
+						return cookie[name];
+					}
+					var token = getCookie("token");
+					var server_url = window.location.origin + "/";
+					var ws_url = "ws://" + window.location.host + "/";
+					var requestOptions = {
+							mode:'cors',
+							method: 'POST',
+							redirect: 'follow',
+							headers: {
+								'Authorization': 'Token '+token ,
+								'Content-Type': 'application/json'
+							},
+						};
+					var socket;
+					
+					function connect(event) 
+					{
+						var url = ws_url + "?token="+token
+						console.log(url);
+						socket = new WebSocket(url);
+							socket.onopen=onOpen;
+							socket.onmessage=onMessage;
+							socket.onclose=onClose;
+							socket.onerror=onError;
+					}
+
+					function send(event)
+					{
+						socket.send(document.getElementById("body").value);
+					}
+
+					function sendExit(event)
+					{
+						socket.send("{\"CMD\":\"EXIT\"}")
+					}
+
+					function sendReady(event)
+					{	
+						socket.send("{\"CMD\":\"READY\"}")
+					}
+
+					function onOpen(event) 
+					{
+						console.log("onOpen");
+
+					}
+
+					function handelOpponentDetails(opponent_details)
+					{
+						console.log(opponent_details);
+						document.getElementById("info_message").style.visibility="hidden"; // or visible|hidden|collapse|initial|inherit
+						document.getElementById("opponent_name").innerHTML = opponent_details["username"];
+						document.getElementById("opponent_age").innerHTML = opponent_details["age"];
+						document.getElementById("opponent_bio").innerHTML = opponent_details["bio"];
+
+						if (opponent_details["gender"]=="m")
+						{
+
+							document.getElementById("opponent_gender").innerHTML = "Male";
+						}
+						else
+						{
+							document.getElementById("opponent_gender").innerHTML = "Female";
+						}
+						document.getElementById("chat_menu").style.display="initial";
+						document.getElementById("chat_box").style.display="initial";
+						console.log("done");
+
+					}
+
+					function receiveMessage(message_text)
+					{
+						var msg = document.createElement("p");
+						msg.classList.add("incoming_message");
+						var msg_content = document.createTextNode(message_text);
+						msg.appendChild(msg_content);
+						var element = document.getElementById("chat_box");
+						element.appendChild(msg);
+					}
+					
+					function handleError()
+					{
+						document.getElementById("info_message").innerHTML = "Error occurred";
+						socket.close();
+					}
+
+					function onMessage(event) 
+					{
+						var received_data=JSON.parse(event.data);
+						var command = received_data["CMD"];
+						console.log("Message: Data received from server:"+(command));
+						if (command == "WAIT_FOR_OPPONENT")
+						{
+							document.getElementById("info_message").innerHTML = "Finding a match...";
+						}
+						else if(command == "OPPONENT_DETAILS")
+						{
+							handelOpponentDetails(received_data["data"]);
+						}
+						else if(command == "MSG")
+						{
+							receiveMessage(received_data['data']);
+						}
+						else if(command == "OPPONENT_LEFT")
+						{
+							showOpponentLeftMenu();
+						}
+					}
+
+					function onClose(event) 
+					{
+						console.log("onClose");
+						if (event.wasClean) 
+						{
+						  console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+						}
+						else 
+						{
+							console.log('[close] Connection died');
+							document.getElementById("info_message").innerHTML = "Could not connect to server";
+
+						}
+					}
+
+					function onError(event) 
+					{
+						console.log("onError");
+						document.getElementById("info_message").innerHTML = "Could not connect to server";
+					}
+
+					function sendMessage()
+					{
+						var text = document.getElementById("message_input").value;
+						if(text == "" || text.length == 0 || text == null)
+						{
+							console.log("Message field cannot be empty");
+						}
+						else
+						{
+							var full_message = "{\"CMD\":\"MSG\",\"data\":\"" + text + "\"}";
+							console.log(full_message);
+							socket.send(full_message);
+							var msg = document.createElement("p");
+							msg.classList.add("outgoing_message");
+							var msg_content = document.createTextNode(text);
+							msg.appendChild(msg_content);
+							var element = document.getElementById("chat_box");
+							element.appendChild(msg);
+						}
+						//clear the input field
+						document.getElementById("message_input").value = "";
+					}
+
+					function showReportMenu()
+					{
+						document.getElementById("report_menu").style.display = "initial";
+						return false;
+					}
+
+					
+					function hideReportMenu()
+					{
+						document.getElementById("report_menu").style.display = "none"; 					
+					}
+
+
+					function hideChatUI()
+					{
+						document.getElementById("chat_menu").style.display = "none"; 
+						document.getElementById("chat_box").style.display = "none"; 
+					}
+					
+					function nextUserAfterReport()
+					{
+						// simply reload the page.Improvements later
+						window.location.reload();
+					}
+
+					function showOpponentLeftMenu()
+					{
+						// hide all divs except "opponent_left_menu"
+						document.getElementById("chat_menu").style.display = "none";
+						document.getElementById("chat_box").style.display = "none";
+						document.getElementById("report_menu").style.display = "none";
+						document.getElementById("after_report_menu").style.display = "none";
+						document.getElementById("info_message").style.display = "none";	
+						document.getElementById("opponent_left_menu").style.display = "block";				
+					}
+
+					function exitChat()
+					{
+						window.location.assign(server_url+"start_chat/");
+					}
+
+					function showAfterReportMenu()
+					{
+						document.getElementById("after_report_menu").style.display = "block";
+					}
+					// called when user presses "next user" in the middle of the chat
+					function showNextUserMenu()
+					{
+						if (confirm('Are you sure?')) 
+						{
+							window.location.reload();
+						}
+						else 
+						{
+  							// Do nothing!
+						}
+					}
+
+					// called when user presses "Exit chat" in the middle of the chat
+					function showExitMenu()
+					{
+						if (confirm('Are you sure?')) 
+						{
+							window.location.assign(server_url+"start_chat/");
+						}
+						else 
+						{
+  							// Do nothing!
+						}
+					}
+
+
+					function submitReport()
+					{	
+						var report_id = "";
+						var report_message = "";
+						var report_text = document.getElementById("report_reason_others_text").value;
+
+						if (document.getElementById('report_reason3').checked)
+						{
+							console.log("3 clicked");	
+							// when report_id is 3, report_text is mandatory
+							if (report_text.length==0)
+							{
+								document.getElementById("report_others_warn").innerHTML="Please explain the reason";
+								return;
+							}
+							console.log("report text is..",report_text);
+							report_id=3;
+						}
+						else
+						{
+							document.getElementById("report_others_warn").innerHTML="";
+							if (document.getElementById('report_reason0').checked)
+							{
+								console.log("0 selected");
+								report_id = "0";
+							}
+							else if (document.getElementById('report_reason1').checked)
+							{
+								console.log("1 selected");
+								report_id = "1";
+							}
+							else if (document.getElementById('report_reason2').checked)
+							{
+								console.log("2 selected");
+								report_id = "2";
+							}
+						}
+
+						if (report_text.length==0)
+						{
+							report_message = "{\"CMD\":\"REPORT\",\"report_id\":\"" + report_id + "\"}";
+						}
+						else
+						{
+							report_message = "{\"CMD\":\"REPORT\",\"report_id\":\"" + report_id + "\",\"report_text\":\"" +report_text + "\"}";
+						}
+						socket.send(report_message);
+						console.log("report sent", report_message);
+						hideReportMenu();
+						hideChatUI();
+						showAfterReportMenu();
+						return false;
+					}
+					
+					window.onload = function() {
+						// connect only after HTML is loaded. Else there wont be any document to modify
+						connect();
+					};
+					</script>
+					<!-- script done -->
+	</head>
+
+	<body>
+		<p id="info_message"></p>
+
+		<div id="chat_menu" style="display: none;">
+			<p id="opponent_name"></p>
+			<p id="opponent_gender"></p>
+			<p id="opponent_age"></p>
+			<p id="opponent_bio"></p>
+			<button onclick="showReportMenu()">Report</button>
+			<button onclick="showNextUserMenu()">Chat with someone else</button>
+			<button onclick="showExitMenu()">Exit</button>
+		</div>
+
+		<div id="chat_box" style="display: none;">
+			<p>Start chatting!</p>
+			<p class="message">Message</p>
+			<input type="text" id="message_input" placeholder="Type your message" autocomplete="off">
+			<button onclick="sendMessage()">Send</button>
+		</div>
+		<!-- report menu. -->
+		<div id="report_menu" style="display: none;">
+			<form onsubmit="return submitReport();" autocomplete="off">
+				<p>Report</p>
+				<div>
+
+				<input type="radio" id="report_reason0" name="report_reason" value="0"
+						checked>
+				<label for="report_reason0">Spam / Bot / Fake Profile</label>
+				</div>
+
+				<div>
+				<input type="radio" id="report_reason1" name="report_reason" value="1">
+				<label for="report_reason1">Inappropriate username / Bio</label>
+				</div>
+
+				<div>
+				<input type="radio" id="report_reason2" name="report_reason" value="2">
+				<label for="report_reason2">Abuse / Inappropriate messages</label>
+				</div>
+				
+				<div>
+				<input type="radio" id="report_reason3" name="report_reason" value="3">
+				<label for="report_reason3">Others (Please explain)</label>
+				</div>
+				
+				<input type="text" id="report_reason_others_text" maxlength="200" placeholder="Please explain your report">
+				<p id="report_others_warn" style="color: red;"></p>
+				<!-- <br> -->
+				<input type="button" onclick="submitReport()" value="Report(exits this chat)">
+				<!-- Explicity specify type as "button" to avoid button from triggering a submit -->
+				<button type="button" onclick="hideReportMenu()" id="report_cancel">Cancel</button>
+			</form>
+		</div>
+
+		<div id="after_report_menu" style="display: none;">
+			<p>Report has been sent</p>
+			<button type="button" onclick="nextUserAfterReport()" id="after_report_next_user">Next user</button>
+			<!-- <button type="button" onclick="showFeedbackMenu()" id="after_report_feedback">Feedback</button> -->
+			<button type="button" onclick="exitChat()" id="after_report_exit">Exit</button>
+		</div>
+
+		<div id="opponent_left_menu" style="display: none;">
+			<p>Opponent has left the chat</p>
+			<button type="button" onclick="nextUserAfterReport()" id="after_report_next_user">Next user</button>
+			<button type="button" onclick="exitChat()" id="after_report_exit">Exit</button>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="/static/style.css">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+		crossorigin="anonymous"></script>
+
+	<title>Hello</title>
+	<style type="text/css">
+		body {
+			background: #eee;
+		}
+
+		.chat-list {
+			padding: 0;
+			font-size: .8rem;
+		}
+
+		.chat-list li {
+			margin-bottom: 10px;
+			overflow: auto;
+			color: #ffffff;
+		}
+
+		.chat-list .chat-img {
+			float: left;
+			width: 48px;
+		}
+
+		.chat-list .chat-img img {
+			-webkit-border-radius: 50px;
+			-moz-border-radius: 50px;
+			border-radius: 50px;
+			width: 100%;
+		}
+
+		.chat-list .chat-message {
+			-webkit-border-radius: 50px;
+			-moz-border-radius: 50px;
+			border-radius: 50px;
+			background: #5a99ee;
+			display: inline-block;
+			padding: 10px 20px;
+			position: relative;
+		}
+
+		.chat-list .chat-message:before {
+			content: "";
+			position: absolute;
+			top: 15px;
+			width: 0;
+			height: 0;
+		}
+
+		.chat-list .chat-message h5 {
+			margin: 0 0 5px 0;
+			font-weight: 600;
+			line-height: 100%;
+			font-size: .9rem;
+		}
+
+		.chat-list .chat-message p {
+			line-height: 18px;
+			margin: 0;
+			padding: 0;
+		}
+
+		.chat-list .chat-body {
+			margin-left: 20px;
+			float: left;
+			width: 70%;
+		}
+
+		.chat-list .in .chat-message:before {
+			left: -12px;
+			border-bottom: 20px solid transparent;
+			border-right: 20px solid #5a99ee;
+		}
+
+		.chat-list .out .chat-img {
+			float: right;
+		}
+
+		.chat-list .out .chat-body {
+			float: right;
+			margin-right: 20px;
+			text-align: right;
+		}
+
+		.chat-list .out .chat-message {
+			background: #fc6d4c;
+		}
+
+		.chat-list .out .chat-message:before {
+			right: -12px;
+			border-bottom: 20px solid transparent;
+			border-left: 20px solid #fc6d4c;
+		}
+
+		.card .card-header:first-child {
+			-webkit-border-radius: 0.3rem 0.3rem 0 0;
+			-moz-border-radius: 0.3rem 0.3rem 0 0;
+			border-radius: 0.3rem 0.3rem 0 0;
+		}
+
+		.card .card-header {
+			background: #17202b;
+			border: 0;
+			font-size: 1rem;
+			padding: .65rem 1rem;
+			position: relative;
+			font-weight: 600;
+			color: #ffffff;
+		}
+
+		.content {
+			margin-top: 40px;
+		}
+	</style>
+	</style>
+</head>
+
+<body>
+	<!-- navbar begins -->
+	<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+		<div class="container-fluid p-1">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+				data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a class="btn btn-danger" onclick="showExitMenu()" aria-current="page" href="#">Exit</a>
+						<button class="btn btn-primary" onclick="showNextUserMenu()">Chat with someone else</button>
+					</li>
+				</ul>
+				<ul class="d-flex mb-2 mb-lg-0">
+					<button class="btn btn-warning" onclick="showReportMenu()">Report</button>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<!--  navbar ends-->
+
+	<!-- ==================================Chat page begins -->
+	<!-- <div class="container content"> -->
+	<!-- <div class="row"> -->
+	<!-- <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12"> -->
+	<div class="card">
+		<!-- <div class="card-header">Chat</div> -->
+		<div class="card-body height3">
+			<ul class="chat-list">
+				<li class="in">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Jimmy Willams</h5>
+							<p>Raw denim heard of them tofu master cleanse</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Next level veard</p>
+						</div>
+					</div>
+				</li>
+				<li class="in">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5 class="name">Jimmy Willams</h5>
+							<p>Will stumptown scenes coffee viral.</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+				<li class="out">
+					<div class="chat-body">
+						<div class="chat-message">
+							<h5>Serena</h5>
+							<p>Tofu master best deal</p>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<!-- </div> -->
+	<!-- Chat page ends -->
+
+	<!-- Input begins -->
+	<footer class="footer fixed-bottom">
+		<div id="chat_box" class="input-group">
+			<input type="text" class="form-control form-control-lg" id="message_input" placeholder="Type your message"
+				aria-describedby="send"
+				value="Lorem ipsum dolor, sit amet consectetur adipisicing elit. Reprehenderit explicabo dignissimos, facere ea dolorum modi eligendi obcaecati tenetur aut iure esse molestias, commodi laboriosam inventore sapiente vel, adipisci facilis cumque!"
+				autocomplete="off">
+			<button class="btn btn-success" id="send" type="button" onclick="sendMessage()">Send</button>
+		</div>
+	</footer>
+	<!--Input ends  -->
+</body>
+
+</html>

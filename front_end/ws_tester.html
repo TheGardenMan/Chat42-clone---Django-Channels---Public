@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WS tester</title>
+	<style type="text/css">
+		body{
+			font-family: Monolisa;	
+			background-color: black;
+			color: #42eff5;
+		    font-weight: bold;
+		  font-size: 16px;
+		}
+		input, select, textarea{
+		    color: #ff0000;
+		    font-weight: bold;
+		}
+		input {
+		  width: 30%;
+		}
+		button {
+		  background-color: #4CAF50; /* Green */
+		  border: none;
+		  color: white;
+		  padding: 5px 15px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		
+		function getTheTime() {
+			var today = new Date();
+			var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+			return time;
+		}
+		var socket;
+		function connect(event) {
+			var url=document.getElementById("url").value;
+			var token=document.getElementById("token").value;
+			url = url + "?token="+token
+			logger(url);
+			socket = new WebSocket(url);
+				socket.onopen=onOpen;
+				socket.onmessage=onMessage;
+				socket.onclose=onClose;
+				socket.onerror=onError;
+		}
+		function disconnect(event) {
+			socket.close();
+			logger("disconnect");
+			document.getElementById("connectButton").disabled = false;
+			document.getElementById("connectButton").style.background="#4CAF50";
+			document.getElementById("disconnectButton").disabled = true;
+			document.getElementById("disconnectButton").style.background="grey";
+		}
+		function send(event) {
+			logger("send : "+document.getElementById("body").value);
+			socket.send(document.getElementById("body").value);
+		}
+		function send_exit(event)
+		{
+			logger("send :{\"CMD\":\"EXIT\"}" );
+			socket.send("{\"CMD\":\"EXIT\"}")
+		}
+
+		function send_ready(event)
+		{	
+			logger("send : {\"CMD\":\"READY\"}");
+			socket.send("{\"CMD\":\"READY\"}")
+		}
+		function send_report()
+		{
+			logger("send : "+document.getElementById("report").value);
+			socket.send(document.getElementById("report").value);
+		}
+		function logger(data) {
+			document.getElementById("log").value=document.getElementById("log").value+"\n"+getTheTime()+"	 --> "+data;
+		}
+
+		function onOpen(event) {
+			console.log("onOpen");
+			logger("open");
+			document.getElementById("connectButton").disabled = true;
+			document.getElementById("connectButton").style.background="grey";
+			document.getElementById("disconnectButton").disabled = false;
+			document.getElementById("disconnectButton").style.background="#4CAF50";
+
+
+		}
+		function onMessage(event) {
+			console.log("onMessage");
+			// yup these two steps are needed to remove those "\"
+			var received_data=JSON.parse(event.data);
+			received_data=JSON.stringify(received_data);
+			// received_data=JSON.stringify(event.data).replace("\","");
+			logger("Message: Data received from server:"+(received_data));
+		}
+		function onClose(event) {
+			console.log("onClose");
+			logger("close");
+			if (event.wasClean) {
+			  logger(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+			} else {
+			  // e.g. server process killed or network down
+			  // event.code is usually 1006 in this case
+			  logger('[close] Connection died');
+			}
+			document.getElementById("connectButton").disabled = false;
+			document.getElementById("connectButton").style.background="#4CAF50";
+			document.getElementById("connectButton").innerHTML="Connect";
+			document.getElementById("disconnectButton").disabled = true;
+			document.getElementById("disconnectButton").style.background="grey";
+			document.getElementById("disconnectButton").innerHTML="Disconnected";
+		}
+		function onError(event) {
+			console.log("onError");
+			logger("Error");
+			document.getElementById("connectButton").disabled = false;
+			document.getElementById("connectButton").style.background = "#4CAF50";
+			document.getElementById("connectButton").innerHTML="Connect";
+		}
+		async function signup() {
+			logger("signup")
+			var formdata = new FormData();
+			formdata.append("username", document.getElementById("signup_username").value);
+			formdata.append("password", document.getElementById("signup_password").value);
+
+			var requestOptions = {
+			  method: 'POST',
+			  body: formdata,
+			  redirect: 'follow'
+			};
+
+			var response=await fetch("http://127.0.0.1:8000/signup/", requestOptions);
+			var jsonResp=await response.json();
+			var textResp=JSON.stringify(jsonResp);
+			logger(textResp);
+			if (response.status==201)
+			{
+				console.log(jsonResp.token);
+				document.getElementById("token").value=jsonResp.token;
+				document.getElementById("token_title").innerHTML="token of "+jsonResp.username;
+				logger("token & username updated");
+			}
+			logger("signup complete ");
+		}
+		async function login() {
+			logger("login")
+			var formdata = new FormData();
+			formdata.append("username", document.getElementById("login_username").value);
+			formdata.append("password", document.getElementById("login_password").value);
+
+			var requestOptions = {
+			  method: 'POST',
+			  body: formdata,
+			  redirect: 'follow'
+			};
+
+			await fetch("http://127.0.0.1:8000/login/", requestOptions)
+			  .then(response => response.text())
+			  .then(result => {
+			  	document.getElementById("token_title").innerHTML="token of "+document.getElementById("login_username").value;
+			  	document.getElementById("token").value=result.substring(10,50);
+			  	logger(result);
+			  })
+			  .catch(error => logger('error', error));
+			  logger("login complete");
+		}
+		async function create_profile() {
+			logger("create_profile for "+document.getElementById("token").value);
+			var token=document.getElementById("token").value;
+			var gender=document.getElementById("gender").value;
+			var birth_year=document.getElementById("birth_year").value;
+			var birth_month=document.getElementById("birth_month").value;
+			var requestOptions = {
+				mode:'cors',
+				method: 'POST',
+				headers: {
+			  		'Authorization': 'Token '+token ,
+					'Content-Type': 'application/json'
+				},
+				body:JSON.stringify({gender:gender,birth_year:birth_year,birth_month:birth_month})
+			};
+			logger(requestOptions.body);
+			const reply=await fetch("http://127.0.0.1:8000/create_profile/", requestOptions).then( reply => {return reply;});
+			console.log((reply));
+			logger("create_profile complete "+JSON.stringify(reply.status)+" "+reply.statusText);
+		}
+
+		function clearlog() {
+			document.getElementById("log").value="";
+		}
+
+		async function set_preferences() {
+			logger("set_preferences");
+			var token=document.getElementById("token").value;
+			var gender_preference=document.getElementById("gender_preference").value;
+			var bio=document.getElementById("bio").value;
+			var requestOptions = {
+				mode:'cors',
+				method: 'POST',
+				headers: {
+			  		'Authorization': 'Token '+token ,
+					'Content-Type': 'application/json'
+				},
+				body:JSON.stringify({gender_preference:gender_preference,bio:bio})
+			};
+			logger(requestOptions.body);
+			const response=await fetch("http://127.0.0.1:8000/set_preferences/", requestOptions).then( response => {return response;});
+			console.log((response));
+			logger(response.status+" "+response.statusText);
+			logger("set_preferences complete ");
+
+		}
+
+		async function get_preferences() {
+			logger("get_preferences");
+			var token=document.getElementById("token").value;
+			var requestOptions = {
+				mode:'cors',
+				method: 'POST',
+				headers: {
+			  		'Authorization': 'Token '+token ,
+					'Content-Type': 'application/json'
+				},
+			};
+			const response=await fetch("http://127.0.0.1:8000/get_preferences/", requestOptions).then( response => {return response;});
+			// console.log((response));
+			var jsonResp=await response.json();
+			var textResp=JSON.stringify(jsonResp);
+			logger(textResp);
+			logger("get_preferences complete ");
+		}
+		// function handleClick() {
+		// 	console.log("handleClick");
+		// 	url=document.getElementById("url").value;
+		// 	token=document.getElementById("token").value;
+		// 	var body=document.getElementById("body").value;
+		// 	// console.log("body",JSON.parse(body));
+		// 	// console.log("url ",url);
+		// 	// console.log("token ",token);
+		// 	// console.log(document.getElementById("body").value);
+		// 	// console.log(document.getElementById("log").value);
+		// 	var x=1
+		// 	document.getElementById("log").value="\n "+x+document.getElementById("log").value;
+		// 	socket.onopen=onOpen;
+		// 	socket.onmessage=onMessage;
+		// 	socket.onclose=onClose;
+		// 	socket.onerror=onError;
+
+		// }
+
+	</script>
+	<p>url</p>
+	<input type="text" value="ws://127.0.0.1:8000/" id="url">
+	<p id="token_title">token of qwert</p>
+	<input type="text" value="5bef8a8b6f1ed2897a3cfb9085573324c24e8d66" id="token">
+	<br>
+	<br>
+	<button id="connectButton" onclick="connect()">Connect</button>
+	<button id="disconnectButton" style="background-color:grey;" disabled onclick="disconnect()">Disconnect</button>
+	<p>body</p>
+	<!-- https://www.freeformatter.com/html-escape.html -->
+	<input type="text" value="{&quot;CMD&quot;:&quot;MSG&quot;,&quot;data&quot;:&quot;Hello&quot;}" id="body">
+	<br><br>
+	<button onclick="send()" >Send</button>
+	<!-- send EXIT -->
+	<!-- <br><br> -->
+	<input type="text" value="{&quot;CMD&quot;:&quot;EXIT&quot;,&quot;data&quot;:&quot;Hello&quot;}" id="cmd" hidden>
+	<br><br>
+	<button onclick="send_exit()" >Send EXIT</button>
+	<!-- send READY -->
+	<!-- <br><br> -->
+	<input type="text" value="{&quot;CMD&quot;:&quot;READY&quot;,&quot;data&quot;:&quot;" id="ready" hidden >
+	<br><br>
+	<button onclick="send_ready()" >Send READY</button>
+	<!-- send REPORT -->
+	<!-- <br><br> -->
+	<pre>
+		spam/bot/fake account
+		inappropriate username/profile/bio
+		abuse/sex talk/nudity
+		others(text-box,compulsory,200 chars)
+	</pre>
+	<p>report_text is optional unless,report_id is 3</p>
+	<input type="text" value="{&quot;CMD&quot;:&quot;REPORT&quot;,&quot;report_id&quot;:&quot;1&quot;,&quot;report_text&quot;:&quot;he's dump&quot;}" id="report">
+	<br><br>
+	<button onclick="send_report()" >Send REPORT</button>
+	<!-- Log -->
+	<p style="position: absolute; top: 0px; right: 490px;">Log</p>
+	<textarea readonly id="log" name="log" rows="17" cols="60" style="position: absolute; top: 40px; right: 100px;">
+	</textarea>
+	<button style="position: absolute; top: 330px; right: 100px;" onclick="clearlog()" >Clear log</button>
+	<!-- Sign-up -->
+	<p>username</p>
+	<input type="text" value="" id="signup_username">
+	<p>password</p>
+	<input type="text" value="Jaxtek143" id="signup_password">
+	<br>
+	<br>
+	<button onclick="signup()" >Signup</button>
+
+	<!-- Login -->
+	<div style="position: absolute; top: 340px; right: 350px;">
+		<p >username</p>
+		<input style="width: 200%;" type="text" value="jaggu" id="login_username">
+		<p >password</p>
+		<input  style="width: 200%;"  type="text" value="Jaxtek143" id="login_password">
+		<br>
+		<br>
+		<button onclick="login()" >Login</button>
+		<!--  set preferences-->
+		<p >gender_preference</p>
+		<input style="width: 200%;" type="text" value="a" id="gender_preference">
+		<p >bio</p>
+		<input  style="width: 200%;"  type="text" value="Hi there!" id="bio">
+		<br>
+		<br>
+		<button onclick="set_preferences()" >Set preferences</button>
+	</div>
+	<!-- Create_profile -->
+	<p>birth_year</p>
+	<input type="number" value="1998" id="birth_year">
+	<p>birth_month</p>
+	<input type="number" value="07" id="birth_month">
+	<p>gender</p>
+	<input type="text" value="m" id="gender">
+	<br>
+	<br>
+	<button onclick="create_profile()" >Create profile</button>
+
+	<!-- Get prefe -->
+	<button onclick="get_preferences()" >get_preferences</button>
+</body>
+</html>

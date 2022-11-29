@@ -1,0 +1,16 @@
+[Unit]
+Description=Match C42
+After=network.target
+[Service]
+Environment="should_filter_strictly=True"
+#Since match.py imports db_handle.py
+Environment="postgres_username=postgres"
+Environment="postgres_password=jaxtek"
+Environment="postgres_port=5432"
+Type=simple
+User=jaga
+WorkingDirectory=/home/jaga/C42/chat
+ExecStart=python match.py
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

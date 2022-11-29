@@ -1,0 +1,204 @@
+<!-- LW:Chat top bar responsive CSS and good buttons
+	info_message CSS in the middle of the page for clear viewing
+	Report menu in the center of page while hiding everything else
+	Messages in out responsive
+	Move all the CSS and html changes to chat.html
+ -->
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chat!</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/static/style.css">
+	 <!-- For live-server -->
+	 <link rel="stylesheet" href="style.css">	
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+		integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+		crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-expand navbar-light" style="background-color: #e3f2fd;">
+		<div class="container-fluid">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+				data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto">
+					<li class="nav-item">
+						<a href="#" class="h5 text-danger text-decoration-none" data-bs-toggle="modal"
+							data-bs-target="#leaveChatModal">
+							<i class="bi bi-chevron-left"></i> Stop
+						</a>
+					</li>
+				</ul>
+				<div class="nav-item float-right">
+					<a href="#" class="h4 me-2 text-primary text-decoration-none" data-bs-toggle="modal"
+						data-bs-target="#nextChatModal">
+						Next <i class="bi bi-person"></i>
+					</a>
+					<a href="#" class="h3 text-danger" data-bs-toggle="modal" data-bs-target="#reportMenu">
+						<i class="bi bi-exclamation-circle"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<!--  -->
+	<p id="info_message" style="display: none;">Finding a match...</p>
+
+	<div id="chat_menu" class="border m-2" style="background-color: #eee;">
+		<!-- <button onclick="showReportMenu()">Report</button>
+			<button onclick="showNextUserMenu()">Chat with someone else</button> -->
+		<!-- <button onclick="showExitMenu()">Exit</button> -->
+		<h5 class="ps-5 mt-1">
+			<span id="opponent_name" class="h3">jagadees1</span>,
+			<span id="opponent_gender" class="lead">Male</span>,
+			<span id="opponent_age" class="lead">71</span>
+		</h5>
+		<small id="opponent_bio" class="lead ps-5">Hi there!</small>
+	</div>
+
+	<main class="card card-height card-width m-auto mb-4 shadow-lg">
+
+		<div id="chat_window" class="chat-list">
+
+		</div>
+		<!-- report menu. -->
+		<div class="modal fade" id="reportMenu" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="staticBackdropLabel">Report</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form onsubmit="return submitReport();" autocomplete="off">
+
+							<div class="form-check">
+								<input type="radio" class="form-check-input" id="report_reason0" name="report_reason"
+									value="0" checked="checked">
+								<label for="report_reason0" class="form-check-label">Spam / Bot / Fake Profile</label>
+							</div>
+
+							<div class="form-check">
+								<input type="radio" class="form-check-input" id="report_reason1" name="report_reason"
+									value="1">
+								<label for="report_reason1" class="form-check-label">Inappropriate username /
+									Bio</label>
+							</div>
+
+							<div class="form-check">
+								<input type="radio" class="form-check-input" id="report_reason2" name="report_reason"
+									value="2">
+								<label for="report_reason2" class="form-check-label">Abuse / Inappropriate
+									messages</label>
+							</div>
+
+							<div class="form-check">
+								<input type="radio" class="form-check-input" id="report_reason3" name="report_reason"
+									value="3">
+								<label for="report_reason3" class="form-check-label">Others (Please explain)</label>
+							</div>
+
+							<div class="form-floating mt-2">
+								<textarea class="form-control" maxlength="200" placeholder="Please explain your report"
+									id="report_reason_others_text"></textarea>
+							</div>
+							<p id="report_others_warn" style="color: red;"></p>
+
+							<!-- <br> -->
+							<!-- Explicity specify type as "button" to avoid button from triggering a submit -->
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-danger" onclick="submitReport()">
+							Report(exits this chat)
+						</button>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div id="after_report_menu" style="display: none;">
+			<p>Report has been sent</p>
+			<button type="button" onclick="nextUserAfterReport()" id="after_report_next_user">Next user</button>
+			<!-- <button type="button" onclick="showFeedbackMenu()" id="after_report_feedback">Feedback</button> -->
+			<button type="button" onclick="exitChat()" id="after_report_exit">Exit</button>
+		</div>
+
+		<div id="opponent_left_menu" style="display: none;">
+			<p>Opponent has left the chat</p>
+			<button type="button" onclick="nextUserAfterReport()" id="after_report_next_user">Next user</button>
+			<button type="button" onclick="exitChat()" id="after_report_exit">Exit</button>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="leaveChatModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+			aria-labelledby="staticBackdropLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="staticBackdropLabel">Leave Chat</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						Are you sure?
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" onclick="exitChat()"
+							id="after_report_exit">Ok</button>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="nextChatModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+			aria-labelledby="staticBackdropLabel1" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="staticBackdropLabel1">Proceed to Next Chat</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						Are you sure?
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" onclick="nextUserAfterReport()"
+							id="after_report_next_user">ok</button>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</main>
+
+	<footer class="footer fixed-bottom m-1">
+		<div id="chat_box" class="input-group p-1 mb-2">
+			<input type="text" class="form-control form-control-lg me-3" id="message_input"
+				placeholder="Type your message" aria-describedby="send" autocomplete="off">
+			<a href="#" class="h3 text-primary m-auto me-2" id="send" onclick="sendMessage()">
+				<i class="fas fa-paper-plane"></i>
+			</a>
+		</div>
+	</footer>
+
+	<script src="script.js"></script>
+</body>
+
+</html>

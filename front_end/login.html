@@ -1,0 +1,83 @@
+<html>
+
+<head>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/static/style.css">
+	 <!-- For live-server -->
+	 <link rel="stylesheet" href="style.css">	
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+		integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+		crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+
+		var server_url = window.location.origin + "/";
+		function setCookie(name, value, days) {
+			var expires = "";
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+				expires = "; expires=" + date.toUTCString();
+			}
+			document.cookie = name + "=" + (value || "") + expires + "; path=/;samesite=strict;";
+			// document.cookie = name + "=" + (value || "") + expires + "; path=/;samesite=strict;secure;";
+		}
+
+		async function serverSignup(interests_array) {
+			var formdata = new FormData();
+			formdata.append("username", document.getElementById("username").value);
+			formdata.append("password", document.getElementById("password").value);
+
+			var requestOptions = {
+				method: 'POST',
+				body: formdata,
+				redirect: 'follow'
+			};
+			const response = await fetch(server_url + "login/", requestOptions).then(response => response.json().then(receivedData => ({ status: response.status, data: receivedData })));
+			if (response.status == "200") {
+				//todo: store the token to cookie
+				setCookie("token", response.data.token, 10);
+				console.log(response.data.token);
+				window.location.href = server_url + "start_chat/";
+			}
+			else {
+				alert("Login failed");
+			}
+		}
+
+		/* do not async below function*/
+		function onSignup() {
+			serverSignup();
+			return false;
+		}
+	</script>
+</head>
+
+<body class="d-flex align-items-center">
+	<main class="login-page">
+		<p class="fs-2 text-center">Login</p>
+		<form id="signup_form" onsubmit="return onSignup()">
+			<div class="input-group mb-3">
+				<input class="form-control" type="text" placeholder="Enter username" name="username" id="username"
+					pattern="^[a-z0-9]{5,15}$" required>
+			</div>
+			<div class="input-group mb-3">
+				<input class="form-control" type="password" placeholder="Enter Your Password" name="password"
+					id="password" minlength="8" maxlength="15" required>
+			</div>
+			<div class="input-group">
+				<input class="form-control-md skyblue_button" type="submit">
+			</div>
+		</form>
+		<a href="" onclick="location.href=server_url+'signup_page/';return false;">signup</a>
+	</main>
+</body>
+
+</html>
